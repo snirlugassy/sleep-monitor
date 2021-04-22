@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_monitor"
+        android:icon="@drawable/ic_bedtime_foreground"
+        android:title="Monitor" />
+    <item
+        android:id="@+id/navigation_personal_details"
+        android:icon="@drawable/ic_personal_details_foreground"
+        android:title="Details" />
+    <item
+        android:id="@+id/navigation_user_guide"
+        android:icon="@drawable/ic_user_guide_foreground"
+        android:title="Guide" />
+    <item
+        android:id="@+id/navigation_browse"
+        android:icon="@drawable/ic_folder_foreground"
+        android:title="Browse" />
+</menu>

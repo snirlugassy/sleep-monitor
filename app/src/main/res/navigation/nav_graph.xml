@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/navigation_personal_details">
+
+    <fragment
+        android:id="@+id/navigation_monitor"
+        android:name="com.aimlab.sleepmonitor.MonitorFragment"
+        android:label="fragment_monitor"
+        tools:layout="@layout/fragment_monitor" />
+    <fragment
+        android:id="@+id/navigation_personal_details"
+        android:name="com.aimlab.sleepmonitor.PersonalDetailsFragment"
+        android:label="fragment_personal_details"
+        tools:layout="@layout/fragment_personal_details" />
+    <fragment
+        android:id="@+id/navigation_user_guide"
+        android:name="com.aimlab.sleepmonitor.UserGuideFragment"
+        android:label="fragment_user_guide"
+        tools:layout="@layout/fragment_user_guide" />
+    <fragment
+        android:id="@+id/navigation_browse"
+        android:name="com.aimlab.sleepmonitor.BrowseFragment"
+        android:label="fragment_browse"
+        tools:layout="@layout/fragment_browse" />
+</navigation>
