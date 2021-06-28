@@ -11,55 +11,50 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
         <TextView
             android:id="@+id/frequency_bar_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
             android:layout_marginTop="32dp"
             android:text="@string/frequency_label"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView" />
+            app:layout_constraintTop_toBottomOf="@+id/imageView"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/delay_input_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            android:text="Delay (sec):"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/frequency_bar_label" />
 
         <Button
             android:id="@+id/monitoring_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="36dp"
+            android:layout_marginTop="32dp"
             android:onClick="onClick"
             android:text="start monitor"
             app:backgroundTint="#00C853"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/frequency_bar" />
-
-        <SeekBar
-            android:id="@+id/frequency_bar"
-            style="@style/Widget.AppCompat.SeekBar.Discrete"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="64dp"
-            android:layout_marginLeft="64dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="64dp"
-            android:layout_marginRight="64dp"
-            android:max="5"
-            android:progress="0"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/frequency_bar_label" />
+            app:layout_constraintTop_toBottomOf="@+id/therapyModeSwitch" />
 
         <TextView
             android:id="@+id/isRecordingTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:text="Click on start to record"
             android:textSize="24sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.505"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/monitoring_button" />
 
@@ -73,6 +68,52 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@mipmap/ic_technion_foreground" />
+
+        <EditText
+            android:id="@+id/delay_input"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:ems="10"
+            android:inputType="numberSigned"
+            android:text="0"
+            app:layout_constraintBottom_toBottomOf="@+id/delay_input_label"
+            app:layout_constraintStart_toEndOf="@+id/delay_input_label"
+            app:layout_constraintTop_toTopOf="@+id/delay_input_label" />
+
+        <TextView
+            android:id="@+id/sensorValuesTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/isRecordingTextView" />
+
+        <SeekBar
+            android:id="@+id/frequency_bar"
+            android:layout_width="150dp"
+            android:layout_height="18dp"
+            android:layout_marginStart="24dp"
+            app:layout_constraintBottom_toBottomOf="@+id/frequency_bar_label"
+            app:layout_constraintStart_toEndOf="@+id/frequency_bar_label"
+            app:layout_constraintTop_toTopOf="@+id/frequency_bar_label" />
+
+        <Switch
+            android:id="@+id/therapyModeSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:checked="false"
+            android:switchPadding="20dp"
+            android:switchTextAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:text="Therapy"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/delay_input_label" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

@@ -8,11 +8,15 @@ import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.aimlab.sleepmonitor.R;
 import com.aimlab.sleepmonitor.MonitorFragment;
@@ -20,6 +24,7 @@ import com.aimlab.sleepmonitor.MonitorFragment;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class RecordingService extends Service {
@@ -27,12 +32,17 @@ public class RecordingService extends Service {
     private static final String notification_title = "Sleeping monitor is running";
     //    private static final String notification_message = "Clic";
     private static final String ticker_text = "ticker1";
+    private static final int DATA_CHANGED_MESSAGE = 1;
+    private Handler msgHandler;
+    private Logger logger;
+
+    public boolean saveFileOnDestruction;
+    public float frequency;
 
     public RecordingService() { }
 
     @Override
     public void onCreate() {
-        Log.i("test", "created recording service now");
         super.onCreate();
     }
 
@@ -57,13 +67,18 @@ public class RecordingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        int frequency = 1;
+        logger = new Logger(this);
+        logger.write("RECORDING STARTED", true);
         if (intent !=null && intent.getExtras()!=null) {
-            frequency = intent.getExtras().getInt("frequency");
+            frequency = intent.getFloatExtra("frequency", 1);
+            saveFileOnDestruction = !intent.getBooleanExtra("therapy", true);
+            if (saveFileOnDestruction) {
+                System.out.println("I will save a file");
+            } else {
+                System.out.println("I will not save a file");
+            }
         }
 
-        Log.i("MONITOR_SERVICE", "String monitor service!");
-        System.out.println("TEST PRINT");
         Notification notification = createNotification();
         startForeground(1, notification);
 
@@ -71,37 +86,24 @@ public class RecordingService extends Service {
         recorder = new SensorRecorder(this, Sensor.TYPE_ROTATION_VECTOR, frequency);
         recorder.startRecording();
         //in order to stop the service use: stopSelf();
-
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
+        logger.write("RECORDING STOPPED", true);
+
         recorder.stopRecording();
-        System.out.println("destorying");
 
-        // TODO: set file name as current date & time - yyyy-mm-dd hh:mm:ss AM/PM
-        String fileName = android.text.format.DateFormat.format("yyyy-MM-dd hh:mm:ss a", new java.util.Date()).toString();
-        System.out.println("File name = " + fileName);
-        File recordingDir = new File(getFilesDir(), "recordings");
-        File df = new File(recordingDir, fileName);
-        if (recorder.saveDataToFile(df)) {
-            System.out.println("saved data to file");
-            System.out.println("data dir = " + getFilesDir().toString());
+        if (saveFileOnDestruction) {
+            String fileName = android.text.format.DateFormat.format("yyyy-MM-dd hh:mm:ss a", new java.util.Date()).toString();
+            System.out.println("File name = " + fileName);
+            File recordingDir = new File(getExternalFilesDir(null), "recordings");
+            File df = new File(recordingDir, fileName + getResources().getString(R.string.file_suffix));
+            if (recorder.saveDataToFile(df)) {
+                System.out.println("data was saved to file successfully");
+            }
 
-            // Print the data file for testing
-//            try {
-//                Scanner myReader = new Scanner(df);
-//                System.out.println("------ printing data file ---------");
-//                while (myReader.hasNextLine()) {
-//                    String data = myReader.nextLine();
-//                    System.out.println(data);
-//                }
-//                myReader.close();
-//            } catch (FileNotFoundException e) {
-//                System.out.println("An error occurred.");
-//                e.printStackTrace();
-//            }
         }
 
         stopForeground(true);

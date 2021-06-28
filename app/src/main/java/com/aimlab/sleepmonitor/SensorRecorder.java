@@ -2,11 +2,14 @@ package com.aimlab.sleepmonitor;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -14,54 +17,81 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
-import static android.content.Context.SENSOR_SERVICE;
-import static androidx.core.content.ContextCompat.getSystemService;
 
 public class SensorRecorder extends Activity implements SensorEventListener {
     private final Sensor sensor;
     private final SensorManager sensorManager;
-    private ArrayList<float[]> data;
+    private Intent dataChangedIntent;
+    private int dataBroadcastInterval;
+    private float[] rotationMatrix;
+    private float[] adjustedRotationMatrix;
+    private float[] orientation;
 
     protected Date begin_time, end_time;
     protected Context context;
 
+    public ArrayList<float[]> data;
+    public ArrayList<Long> data_timestamps;
     public int sensorType;
     public int samplingDelay;
 
-    public SensorRecorder(Context context, int sensorType, int frequency) {
+    public SensorRecorder(Context context, int sensorType, float frequency) {
         data = new ArrayList<float[]>();
-        Log.i("test", "building recorder");
+        data_timestamps = new ArrayList<Long>();
+
         sensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(sensorType);
         this.context = context;
         this.sensorType = sensorType;
-        this.samplingDelay = (int) ((float) 1 / frequency * Math.pow(10,6));
-        System.out.println("DELAY:");
-        System.out.println(samplingDelay);
+        this.samplingDelay = (int) ((1 / frequency) * Math.pow(10,6));
+        this.dataChangedIntent = new Intent("sensor-data");
+        this.dataBroadcastInterval = 4;
+        this.rotationMatrix = new float[9];
+        this.adjustedRotationMatrix = new float[9];
+        this.orientation = new float[3];
 
+        // TEST
+        Log.i("FREQ", Float.toString(frequency));
+        Log.i("DELAY", Integer.toString(samplingDelay));
     }
 
     protected void onResume() {
-        Log.i("test", "recorder resumed");
         super.onResume();
         sensorManager.registerListener(this, sensor, samplingDelay);
-
     }
 
     protected void onPause() {
-        Log.i("test", "recorder paused");
         super.onPause();
         sensorManager.unregisterListener(this);
     }
 
+
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == sensor.getType()) {
-            data.add(event.values);
-            // Print the sensor data while recording:
-            Log.i("SENSOR", Arrays.toString(event.values));
+            long current_timestamp = System.currentTimeMillis();
+            int ts_count = this.data_timestamps.size();
+            if (ts_count == 0 || (current_timestamp - this.data_timestamps.get(ts_count-1)) * 1000 > this.samplingDelay) {
+                SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
+                SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Z, adjustedRotationMatrix);
+                SensorManager.getOrientation(adjustedRotationMatrix, orientation);
+
+                data_timestamps.add(current_timestamp);
+                data.add(orientation.clone());
+
+                System.out.println("Added new data point");
+                System.out.println(data.size());
+
+//                System.out.println(Arrays.toString(orientation));
+
+                if (data.size() % dataBroadcastInterval == 0) {
+//                    System.out.println("Updating UI vector");
+                    dataChangedIntent.putExtra("sensor-values", orientation);
+                    dataChangedIntent.putExtra("data-length", data.size());
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(dataChangedIntent);
+                }
+            }
         }
     }
 
@@ -79,11 +109,16 @@ public class SensorRecorder extends Activity implements SensorEventListener {
 
     public boolean saveDataToFile(File dataFile) {
         // the return value indicates the success of writing the data to file
+        System.out.println("Writing data to file, number of data points:");
+        System.out.println(data.size());
+
         try {
             FileWriter fileWriter = new FileWriter(dataFile, false);
-            for (float [] row: data) {
-                for (int i=0; i<row.length-1; i++) {
-                    fileWriter.write(Float.toString(row[i]) + ",");
+            for (int i = 0; i < data.size(); i++) {
+                float [] row = data.get(i);
+                fileWriter.write(Long.toString(data_timestamps.get(i)) + ",");
+                for (int j=0; j < row.length-1; j++) {
+                    fileWriter.write(Float.toString(row[j]) + ",");
                 }
                 fileWriter.write(Float.toString(row[row.length-1]) + "\n");
             }
